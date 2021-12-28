@@ -32,6 +32,9 @@ class PublicKey(Point):
 
   @classmethod
   def from_private_key(cls, prvk : int) -> PublicKey:
+    """ prvk can be an int or a hex string """
+    assert isinstance(prvk, (int, str))
+    prvk = int(prvk, 16) if isinstance(prvk, str) else prvk
     pubk = prvk * get_gen_point()
     return cls.from_point(pubk)
 

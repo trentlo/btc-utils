@@ -68,7 +68,7 @@ class Point:
     t, old_t = 1, 0
 
     while r != 0:
-      quotient = old_r / r
+      quotient = old_r // r
       r, old_r = old_r - quotient * r, r
       s, old_s = old_s - quotient * s, s
       t, old_t = old_t - quotient * t, t
