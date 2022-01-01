@@ -21,14 +21,53 @@ def get_gen_point() -> Point:
   g = Point(g_x, g_y, curve)
   return g
 
+
+@dataclass
+class PrivateKey():
+  """ private keys """
+  key : int
+
+  # n is the order of the subgroup
+  @classmethod
+  def gen_random_key(cls) -> PrivateKey:
+    n = get_gen_point().curve.n
+    while True:
+      key = int.from_bytes(os.urandom(32), 'big')
+      if 1 <= key < n:
+        break;
+    return PrivateKey(key)
+
+  @classmethod
+  def from_mnemonic(cls, mnemonic : str):
+    temp = bytes(mnemonic, 'UTF-8')
+    temp = sha256(temp)
+    temp = sha256(temp)
+    key = int.from_bytes(temp, 'big')
+    if key < n:
+      print('n   = ', hex(n))
+      print('key = ', hex(key))
+    else:
+      print('key is too big')
+    return key
+
+  def get_wip(self, net: str, compressed : bool) -> str:
+    """
+    Get the private key in Wallet Import Format.
+    https://gist.github.com/t4sk/ac6f2d607c96156ca15f577290716fcc
+    """
+    k = self.key.to_bytes(32, 'big')
+    if compressed:
+      k += b'\x01'
+    #print(k)
+    version = {'main' : b'\x80', 'test' : b'\xef'}
+    checksum = sha256(sha256(version[net] + k))[:4]
+    ver_privk_checksum = version[net] + k + checksum
+    wip = b58encode(ver_privk_checksum)
+    return wip
+
 @dataclass
 class PublicKey(Point):
   """ public keys """
-
-  @classmethod
-  def generate(cls) -> PublicKey:
-    prvk = cls.gen_random_key()
-    return cls.from_private_key(prvk)
 
   @classmethod
   def from_private_key(cls, prvk : int) -> PublicKey:
@@ -39,23 +78,8 @@ class PublicKey(Point):
     return cls.from_point(pubk)
 
   @classmethod
-  def from_mnemonic(cls, mnemonic : str):
-    h = sha256(str)
-    return cls.from_private_key(h)
-
-  @classmethod
   def from_point(cls, pt: Point) -> PublicKey:
     return cls(x = pt.x, y = pt.y, curve = pt.curve)
-
-  # n is the order of the subgroup
-  @classmethod
-  def gen_random_key(cls) -> int:
-    n = get_gen_point().curve.n
-    while True:
-      key = int.from_bytes(os.urandom(32), 'big')
-      if 1 <= key < n:
-        break;
-    return key
 
   def address(self, net: str, compressed: bool) -> str:
     pubk_hash = self.encode(compressed = compressed)

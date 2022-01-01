@@ -10,7 +10,7 @@ alphabet = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
 alphabet_inv = {c:i for i,c in enumerate(alphabet)}
 
 def b58encode(b: bytes) -> str:
-    assert len(b) == 25 # version is 1 byte, pkb_hash 20 bytes, checksum 4 bytes
+    #assert len(b) == 25 # version is 1 byte, pkb_hash 20 bytes, checksum 4 bytes
     n = int.from_bytes(b, 'big')
     chars = []
     while n:
