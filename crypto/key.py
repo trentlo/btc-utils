@@ -10,7 +10,7 @@ from .ripemd160 import ripemd160
 from .b58check import b58encode
 
 # By default, use secp256k1: http://www.oid-info.com/get/1.3.132.0.10
-def get_gen_point() -> Point:
+def get_generator() -> Point:
   p : int = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F
   a : int = 0x0000000000000000000000000000000000000000000000000000000000000000
   b : int = 0x0000000000000000000000000000000000000000000000000000000000000007
@@ -28,7 +28,7 @@ class PrivateKey():
   key : int
 
   @classmethod
-  def from_private_key(cls, prvk) -> PublicKey:
+  def from_private_key(cls, prvk) -> PrivateKey:
     """ prvk can be an int or a hex string """
     assert isinstance(prvk, (int, str))
     prvk = int(prvk, 16) if isinstance(prvk, str) else prvk
@@ -37,7 +37,7 @@ class PrivateKey():
   # n is the order of the subgroup
   @classmethod
   def gen_random_key(cls) -> PrivateKey:
-    n = get_gen_point().curve.n
+    n = get_generator().curve.n
     while True:
       key = int.from_bytes(os.urandom(32), 'big')
       if 1 <= key < n:
@@ -45,17 +45,17 @@ class PrivateKey():
     return PrivateKey(key)
 
   @classmethod
-  def from_mnemonic(cls, mnemonic : str):
-    temp = bytes(mnemonic, 'UTF-8')
+  def from_mnemonic(cls, mnemonic : str) -> PrivateKey:
+    temp = bytearray(mnemonic, 'UTF-8')
+    #print("before reverse: ", temp)
+    temp.reverse() # use little endian
+    temp : bytes = temp
+    #print("after reverse: ", temp.hex())
     temp = sha256(temp)
     temp = sha256(temp)
     key = int.from_bytes(temp, 'big')
-    if key < n:
-      print('n   = ', hex(n))
-      print('key = ', hex(key))
-    else:
-      print('key is too big')
-    return key
+    assert key < get_generator().curve.n
+    return PrivateKey(key)
 
   def get_wif(self, net: str, compressed : bool) -> str:
     """
@@ -81,7 +81,7 @@ class PublicKey(Point):
     """ prvk can be an int or a hex string """
     assert isinstance(prvk, (int, str))
     prvk = int(prvk, 16) if isinstance(prvk, str) else prvk
-    pubk = prvk * get_gen_point()
+    pubk = prvk * get_generator()
     return cls.from_point(pubk)
 
   @classmethod
