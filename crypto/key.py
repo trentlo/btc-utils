@@ -27,6 +27,13 @@ class PrivateKey():
   """ private keys """
   key : int
 
+  @classmethod
+  def from_private_key(cls, prvk) -> PublicKey:
+    """ prvk can be an int or a hex string """
+    assert isinstance(prvk, (int, str))
+    prvk = int(prvk, 16) if isinstance(prvk, str) else prvk
+    return PrivateKey(prvk)
+
   # n is the order of the subgroup
   @classmethod
   def gen_random_key(cls) -> PrivateKey:
@@ -50,9 +57,9 @@ class PrivateKey():
       print('key is too big')
     return key
 
-  def get_wip(self, net: str, compressed : bool) -> str:
+  def get_wif(self, net: str, compressed : bool) -> str:
     """
-    Get the private key in Wallet Import Format.
+    Get the private key in Wallet Import Format (WIF).
     https://gist.github.com/t4sk/ac6f2d607c96156ca15f577290716fcc
     """
     k = self.key.to_bytes(32, 'big')
@@ -62,15 +69,15 @@ class PrivateKey():
     version = {'main' : b'\x80', 'test' : b'\xef'}
     checksum = sha256(sha256(version[net] + k))[:4]
     ver_privk_checksum = version[net] + k + checksum
-    wip = b58encode(ver_privk_checksum)
-    return wip
+    wif = b58encode(ver_privk_checksum)
+    return wif
 
 @dataclass
 class PublicKey(Point):
   """ public keys """
 
   @classmethod
-  def from_private_key(cls, prvk : int) -> PublicKey:
+  def from_private_key(cls, prvk) -> PublicKey:
     """ prvk can be an int or a hex string """
     assert isinstance(prvk, (int, str))
     prvk = int(prvk, 16) if isinstance(prvk, str) else prvk

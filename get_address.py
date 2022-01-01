@@ -7,9 +7,9 @@ if __name__ == '__main__':
   print('secret key:')
   print(hex(prvk.key).upper())
 
-  wip_prvk : str = prvk.get_wip(net='main', compressed = True)
-  print('wip secret key:')
-  print(wip_prvk)
+  wif_prvk : str = prvk.get_wif(net='main', compressed = True)
+  print('wif secret key:')
+  print(wif_prvk)
 
   pubk = PublicKey.from_private_key(prvk.key)
   print('public key:')
