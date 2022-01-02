@@ -45,16 +45,18 @@ class PrivateKey():
     return PrivateKey(key)
 
   @classmethod
-  def from_mnemonic(cls, mnemonic : str) -> PrivateKey:
+  def from_mnemonic(cls, mnemonic : str, num_hash : int) -> PrivateKey:
     temp = bytearray(mnemonic, 'UTF-8')
     #print("before reverse: ", temp)
     temp.reverse() # use little endian
     temp : bytes = temp
     #print("after reverse: ", temp.hex())
-    temp = sha256(temp)
-    temp = sha256(temp)
+    for i in range(num_hash):
+      temp = sha256(temp)
+      #print(i, ": ", temp)
     key = int.from_bytes(temp, 'big')
-    assert key < get_generator().curve.n
+    assert get_generator().curve.n // 1024 < key < get_generator().curve.n
+    print('ratio = ', key / get_generator().curve.n)
     return PrivateKey(key)
 
   def get_wif(self, net: str, compressed : bool) -> str:

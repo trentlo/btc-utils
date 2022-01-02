@@ -28,7 +28,7 @@ if __name__ == '__main__':
   else:
     print('gen secret key using mnemonic: ')
     print(mnemonic)
-    prvk = PrivateKey.from_mnemonic(mnemonic)
+    prvk = PrivateKey.from_mnemonic(mnemonic, num_hash = 3)
   print('secret key:')
   print(hex(prvk.key).upper())
 
