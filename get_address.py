@@ -8,12 +8,13 @@ if __name__ == '__main__':
   compressed = True
   net = "main"
   mnemonic = None
+  num_hash = 3
 
   argv = sys.argv[1:]
   try:
     # -n (net)
     # `-d mnemonic`: deterministic key gen using
-    opts, args = getopt(argv, "n:d:", ["net=", "deterministic="])
+    opts, args = getopt(argv, "n:d:h:", ["net=", "deterministic="])
   except:
     print("Error")
 
@@ -22,13 +23,15 @@ if __name__ == '__main__':
       net = arg
     elif opt in ['-d', '--deterministic']:
       mnemonic = arg
+    elif opt in ['-h']:
+      num_hash = int(arg)
 
   if mnemonic == None:
     prvk = PrivateKey.gen_random_key()
   else:
     print('gen secret key using mnemonic: ')
     print(mnemonic)
-    prvk = PrivateKey.from_mnemonic(mnemonic, num_hash = 3)
+    prvk = PrivateKey.from_mnemonic(mnemonic, num_hash)
   print('secret key:')
   print(hex(prvk.key).upper())
 
